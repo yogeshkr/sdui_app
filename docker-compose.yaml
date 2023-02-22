@@ -1,0 +1,38 @@
+version: "3.7"
+
+networks:
+    app-network:
+        driver: bridge
+
+services:
+    app:
+        build:
+            context: ./
+            dockerfile: Dockerfile
+        image: laravel8-php-fpm-80
+        container_name: app
+        restart: unless-stopped
+        tty: true
+        working_dir: /var/www/sdui
+        volumes:
+            - ./:/var/www/sdui
+        networks:
+            - app-network
+    sqlite:
+      image: nouchka/sqlite3:latest
+      stdin_open: true
+      tty: true
+      volumes:
+        - ./database:/root/db/
+    nginx:
+        image: nginx:1.19.8-alpine
+        container_name: nginx
+        restart: unless-stopped
+        tty: true
+        ports:
+            - 8100:80
+        volumes:
+            - ./:/var/www/sdui
+            - ./nginx/conf:/etc/nginx/conf.d
+        networks:
+            - app-network
